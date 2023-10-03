@@ -138,7 +138,7 @@ namespace FilmFinder
             DBConnection dbCon = DBConnection.Instance();
             if (dbCon.IsConnected())
             {
-                string query = "INSERT INTO storage(`name`, `description`)VALUES(@title, @description)";
+                string query = "INSERT INTO storage(`name`, `description`)VALUES(@name, @description)";
                 var cmd = new MySqlCommand(query, dbCon.Connection);
                 cmd.Parameters.AddWithValue("@name", name);
                 cmd.Parameters.AddWithValue("@description", description);
@@ -181,68 +181,36 @@ namespace FilmFinder
                 Console.WriteLine($"Updated {affected} rows!");
             }
         }
-        public void ReadStorage(string name)
+        public Storage ReadStorage(int idToFind)
         {
-            public Storage ReadMovie(int movieId)
-            {
-                Storage storage = new Storage(0, null, null);
+           Storage storage = new Storage(0, null, null);
 
-                DBConnection dbCon = DBConnection.Instance();
-                string query;
-                var cmd = new MySqlCommand();
-                if (dbCon.IsConnected())
-                {
-                    query = "SELECT id, title FROM movie WHERE id = @id;";
-                    cmd = new MySqlCommand(query, dbCon.Connection);
-                    cmd.Parameters.AddWithValue("@id", movieId);
+           DBConnection dbCon = DBConnection.Instance();
+           string query;
+           var cmd = new MySqlCommand();
+           if (dbCon.IsConnected())
+           {
+               query = "SELECT id, name, description FROM storage WHERE id = @id;";
+               cmd = new MySqlCommand(query, dbCon.Connection);
+               cmd.Parameters.AddWithValue("@id", idToFind);
 
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            int id = reader.GetInt32("id");
-                            string title = reader.GetString("title");
-                            movie.Id = id;
-                            movie.Title = title;
-                        }
-                    }
-
-                    query = "SELECT p.id, p.name, mp.role FROM people p JOIN movie_people mp ON p.id = mp.person_id WHERE mp.movie_id = @movieId;";
-                    cmd = new MySqlCommand(query, dbCon.Connection);
-                    cmd.Parameters.AddWithValue("@movieId", movieId);
-
-                    movie.Directors = new List<string>();
-                    movie.Writers = new List<string>();
-                    movie.Stars = new List<string>();
-
-                    using (var reader = cmd.ExecuteReader())
-                    {
-
-                        while (reader.Read())
-                        {
-                            string role = reader.GetString("role");
-                            string name = reader.GetString("name");
-
-                            if (role == "director")
-                            {
-                                movie.Directors.Add(name);
-                            }
-                            else if (role == "writer")
-                            {
-                                movie.Writers.Add(name);
-                            }
-                            else if (role == "star")
-                            {
-                                movie.Stars.Add(name);
-                            }
-                        }
-                    }
-                }
-                return movie;
-            }
+               using (var reader = cmd.ExecuteReader())
+               {
+                   while (reader.Read())
+                   {
+                        int id = reader.GetInt32("id");
+                        string name = reader.GetString("name");
+                        string description = reader.GetString("description");
+                        storage.Id = id;
+                        storage.Name = name;
+                        storage.Description = description;
+                   }
+               }
+           }
+           return storage;
         }
 
-        // need to make for people and movie_people tables
+        // need to make for tables people and movie_people
         // Methods to manage people
         public void AddPerson()
         {

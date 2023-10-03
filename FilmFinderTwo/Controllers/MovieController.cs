@@ -26,7 +26,7 @@ namespace FilmFinderTwo.Controllers
         }
 
         [HttpPost(Name = "PostMovie")]
-        public ActionResult Post(MovieDTO movie)
+        public ActionResult Post(AddMovieDTO movie)
         {
             manager.AddMovie(movie.Title);
             _logger.LogInformation(movie.ToString());
@@ -34,7 +34,7 @@ namespace FilmFinderTwo.Controllers
         }
 
         [HttpDelete(Name = "DeleteMovie")]
-        public ActionResult Delete(DeleteDTO toDelete)
+        public ActionResult Delete(DeleteMovieDTO toDelete)
         {
             manager.DeleteMovie(toDelete.id);
             _logger.LogInformation($"Deleted movie with ID: {toDelete}");
@@ -42,25 +42,24 @@ namespace FilmFinderTwo.Controllers
         }
 
         [HttpPut(Name = "PutMovie")]
-        public ActionResult Put(UpdateDTO toUpdate)
+        public ActionResult Put(UpdateMovieDTO toUpdate)
         {
-            manager.UpdateMovie(toUpdate.title, toUpdate.preTitle);
+            manager.UpdateMovie(toUpdate.id, toUpdate.preId);
             _logger.LogInformation($"Updated movie with title: {toUpdate}");
             return Ok();
         }
 
         [HttpGet(Name = "GetMovie")]
-        public ActionResult<Movie> Get(ReadDTO toRead)
+        public ActionResult<Movie> Get(ReadMovieDTO toRead)
         {
             Movie movie = manager.ReadMovie(toRead.id);
             _logger.LogInformation($"Read movie with id: {toRead}");
             return movie;
         }
 
-        public record MovieDTO(string Title);
-        public record DeleteDTO(int id);
-        public record UpdateDTO(string title, string preTitle);
-        public record ReadDTO(int id);
+        public record AddMovieDTO(string Title);
+        public record DeleteMovieDTO(int id);
+        public record UpdateMovieDTO(int id, int preId);
+        public record ReadMovieDTO(int id);
     }
-
 }
