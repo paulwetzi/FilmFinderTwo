@@ -25,15 +25,15 @@ namespace FilmFinderTwo.Controllers
             _logger = logger;
         }
 
-        [HttpPost(Name = "PostMovie")]
+        [HttpPost("PostMovie")]
         public ActionResult Post(AddMovieDTO movie)
         {
-            manager.AddMovie(movie.Title);
+            manager.AddMovie(movie.Title, movie.storageId);
             _logger.LogInformation(movie.ToString());
             return Ok();
         }
 
-        [HttpDelete(Name = "DeleteMovie")]
+        [HttpDelete("DeleteMovie")]
         public ActionResult Delete(DeleteMovieDTO toDelete)
         {
             manager.DeleteMovie(toDelete.id);
@@ -41,7 +41,7 @@ namespace FilmFinderTwo.Controllers
             return Ok();
         }
 
-        [HttpPut(Name = "PutMovie")]
+        [HttpPut("PutMovie")]
         public ActionResult Put(UpdateMovieDTO toUpdate)
         {
             manager.UpdateMovie(toUpdate.id, toUpdate.preId);
@@ -49,17 +49,26 @@ namespace FilmFinderTwo.Controllers
             return Ok();
         }
 
-        [HttpGet(Name = "GetMovie")]
-        public ActionResult<Movie> Get(ReadMovieDTO toRead)
+        [HttpGet("GetMovie")]
+        public ActionResult<Movie> Get([FromQuery] ReadMovieDTO toRead)
         {
             Movie movie = manager.ReadMovie(toRead.id);
-            _logger.LogInformation($"Read movie with id: {toRead}");
-            return movie;
+            _logger.LogInformation($"Read movie with id: {toRead.id}");
+            return Ok(movie);
         }
 
-        public record AddMovieDTO(string Title);
+        [HttpGet("GetAllMovie")]
+        public ActionResult<Movie> Get([FromQuery] ReadAllMovieDTO toRead)
+        {
+            List<Movie> movies = manager.ReadAllMovie(toRead.moviesId);
+            _logger.LogInformation($"Read movie with id: {toRead.moviesId}");
+            return Ok(movies);
+        }
+
+        public record AddMovieDTO(string Title, int storageId);
         public record DeleteMovieDTO(int id);
         public record UpdateMovieDTO(int id, int preId);
         public record ReadMovieDTO(int id);
+        public record ReadAllMovieDTO(int moviesId);
     }
 }

@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace FilmFinder
 {
-    internal class Storage
+    public class Storage
     {
         // Properties
         public int Id { get; set; }

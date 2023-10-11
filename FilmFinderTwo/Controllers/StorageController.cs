@@ -1,6 +1,7 @@
 using FilmFinder;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
+using static FilmFinderTwo.Controllers.StorageController;
 
 /*
  * \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -18,14 +19,14 @@ namespace FilmFinderTwo.Controllers
     {
         Manager manager = new Manager();
 
-        private readonly ILogger<MovieController> _logger;
+        private readonly ILogger<StorageController> _logger;
 
-        public StorageController(ILogger<MovieController> logger)
+        public StorageController(ILogger<StorageController> logger)
         {
             _logger = logger;
         }
 
-        [HttpPost(Name = "PostStorage")]
+        [HttpPost("PostStorage")]
         public ActionResult Post(AddStorageDTO storage)
         {
             manager.AddStorage(storage.name, storage.description);
@@ -33,7 +34,7 @@ namespace FilmFinderTwo.Controllers
             return Ok();
         }
 
-        [HttpDelete(Name = "DeleteStorage")]
+        [HttpDelete("DeleteStorage")]
         public ActionResult Delete([FromBody] DeleteStorageDTO toDelete)
         {
             manager.DeleteStorage(toDelete.id);
@@ -41,7 +42,7 @@ namespace FilmFinderTwo.Controllers
             return Ok();
         }
 
-        [HttpPut(Name = "PutStorage")]
+        [HttpPut("PutStorage")]
         public ActionResult Put(UpdateStorageDTO toUpdate)
         {
             manager.UpdateStorage(toUpdate.name, toUpdate.preName);
@@ -49,11 +50,31 @@ namespace FilmFinderTwo.Controllers
             return Ok();
         }
 
-        [HttpGet(Name = "GetStorage")]
-        public ActionResult<Movie> Get(ReadStorageDTO toRead)
+        // \\\\\\\\\\\\\\\\\  Get Methods  \\\\\\\\\\\\\\\\\
+
+        // With Body
+        //[HttpGet("GetStorageBody")]
+        //public ActionResult<Movie> Get(ReadStorageDTO toRead)
+        //{
+        //    Storage storage = manager.ReadStorage(toRead.idToFind);
+        //    _logger.LogInformation($"Read storage with ID: {toRead}");
+        //    return Ok(storage);
+        //}
+
+        //with Query
+       [HttpGet("GetStorageQuery")]
+        public ActionResult<Movie> Get([FromQuery] int idToFind)
         {
-            Storage storage = manager.ReadStorage(toRead.idToFind);
-            _logger.LogInformation($"Read storage with id: {toRead}");
+            Storage storage = manager.ReadStorage(idToFind);
+            _logger.LogInformation($"Read storage with id: {idToFind}");
+            return Ok(storage);
+        }
+
+        [HttpGet("GetAllStorage")]
+        public ActionResult<List<Storage>> GetAllStorage()
+        {
+            List<Storage> storage = manager.ReadAllStorage();
+            _logger.LogInformation($"Read all storages. Count: {storage.Count}");
             return Ok(storage);
         }
 
@@ -62,5 +83,4 @@ namespace FilmFinderTwo.Controllers
         public record UpdateStorageDTO(string name, string preName);
         public record ReadStorageDTO(int idToFind);
     }
-
 }

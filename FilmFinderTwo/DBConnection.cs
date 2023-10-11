@@ -1,6 +1,7 @@
 ﻿using MySqlConnector;
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,9 +18,7 @@ namespace FilmFinder
 {
     public class DBConnection
     {
-        private DBConnection()
-        {
-        }
+        private DBConnection _connection;
 
 
 
@@ -90,5 +89,7 @@ namespace FilmFinder
         {
             Connection.Close();
         }
+
+
     }
 }
