@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components.Web;
+﻿using FilmFinderTwo;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Identity;
 using MySqlConnector;
 using System;
@@ -24,32 +25,18 @@ namespace FilmFinder
     internal class Manager
     {
         // Methods to manage movies
-        //public int AddMovie(string title, int storageId)
-        //{
-        //    int id = 0;
-        //    DBConnection dbCon = DBConnection.Instance();
-        //    if (dbCon.IsConnected())
-        //    {
-        //        string query = "INSERT INTO movie(`title`)VALUES(@title)";
-        //        var cmd = new MySqlCommand(query, dbCon.Connection);
-        //        cmd.Parameters.AddWithValue("@title", title);
-        //        cmd.Prepare();
-        //        cmd.ExecuteNonQuery();
-        //        id = (int)cmd.LastInsertedId;
-        //    }
-        //    return id;
-        //}
 
-        public int AddMovie(string title, int storageId)
+        public int AddMovie(string title, string imdbUrl, int storageId)
         {
             int id = 0;
             DBConnection dbCon = DBConnection.Instance();
             if (dbCon.IsConnected())
             {
-                string query = "INSERT INTO movie(`title`, `storage_id`) VALUES (@title, @storageId)";
+                string query = "INSERT INTO movie(`title`, `imdb_url`, `storage_id`) VALUES (@title, @imdb_url, @storageId)";
                 var cmd = new MySqlCommand(query, dbCon.Connection);
                 cmd.Parameters.AddWithValue("@title", title);
                 cmd.Parameters.AddWithValue("@storageId", storageId);
+                cmd.Parameters.AddWithValue("@imdb_url", imdbUrl);
                 cmd.Prepare();
                 cmd.ExecuteNonQuery();
                 id = (int)cmd.LastInsertedId;
@@ -78,32 +65,33 @@ namespace FilmFinder
                 }
             }
         }
-        public void UpdateMovie(int id, int preId)
+        public void UpdateMovie(int id, string newTitle, string newImdbUrl)
         {
             DBConnection dbCon = DBConnection.Instance();
             if (dbCon.IsConnected())
             {
-                string query = $"UPDATE movie SET id = @id WHERE id = @preId;";
+                string query = "UPDATE movie SET title = @title, imdb_url = @newImdbUrl WHERE id = @id;";
                 var cmd = new MySqlCommand(query, dbCon.Connection);
                 cmd.Parameters.AddWithValue("@id", id);
-                cmd.Parameters.AddWithValue("@preId", preId);
+                cmd.Parameters.AddWithValue("@title", newTitle);
+                cmd.Parameters.AddWithValue("@newImdbUrl", newImdbUrl);
                 cmd.Prepare();
                 int affected = cmd.ExecuteNonQuery();
                 Console.WriteLine($"Updated {affected} rows!");
             }
         }
-        public Movie ReadMovie(int movieId)
+        public Movie ReadMovie(int idToFind)
         {
-            Movie movie = new Movie(0, null, null, null, null);
+            Movie movie = new Movie(0, null, 0, null);
 
             DBConnection dbCon = DBConnection.Instance();
             string query;
             var cmd = new MySqlCommand();
             if (dbCon.IsConnected())
             {
-                query = "SELECT id, title FROM movie WHERE storage_id = @id;";
+                query = "SELECT id, title, storage_id,imdb_url FROM movie WHERE id = @id;";
                 cmd = new MySqlCommand(query, dbCon.Connection);
-                cmd.Parameters.AddWithValue("@id", movieId);
+                cmd.Parameters.AddWithValue("@id", idToFind);
 
                 using (var reader = cmd.ExecuteReader())
                 {
@@ -111,125 +99,30 @@ namespace FilmFinder
                     {
                         int id = reader.GetInt32("id");
                         string title = reader.GetString("title");
+                        int storage_id = reader.GetInt32("storage_id");
+                        string imdb_url = reader.GetString("imdb_url");
                         movie.Id = id;
                         movie.Title = title;
-                    }
-                }
-
-                query = "SELECT p.id, p.name, mp.role FROM people p JOIN movie_people mp ON p.id = mp.person_id WHERE mp.movie_id = @movieId;";
-                cmd = new MySqlCommand(query, dbCon.Connection);
-                cmd.Parameters.AddWithValue("@movieId", movieId);
-
-                movie.Directors = new List<string>();
-                movie.Writers = new List<string>();
-                movie.Stars = new List<string>();
-
-                using (var reader = cmd.ExecuteReader())
-                {
-
-                    while (reader.Read())
-                    {
-                        string role = reader.GetString("role");
-                        string name = reader.GetString("name");
-
-                        if (role == "director")
-                        {
-                            movie.Directors.Add(name);
-                        }
-                        else if (role == "writer")
-                        {
-                            movie.Writers.Add(name);
-                        }
-                        else if (role == "star")
-                        {
-                            movie.Stars.Add(name);
-                        }
+                        movie.Storage_id = storage_id;
+                        movie.IMDbUrl = imdb_url;
                     }
                 }
             }
             return movie;
         }
 
-        //public List<Movie> ReadAllMovie(int movieId)
-        //{
-        //    List<Movie> movies = new List<Movie>();
-
-        //    DBConnection dbCon = DBConnection.Instance();
-        //    string query;
-        //    var cmd = new MySqlCommand();
-        //    if (dbCon.IsConnected())
-        //    {
-        //        query = "SELECT id, title FROM movie WHERE storage_id = @id;";
-        //        cmd = new MySqlCommand(query, dbCon.Connection);
-        //        cmd.Parameters.AddWithValue("@id", movieId);
-
-        //        using (var reader = cmd.ExecuteReader())
-        //        {
-        //            while (reader.Read())
-        //            {
-        //                int id = reader.GetInt32("id");
-        //                string title = reader.GetString("title");
-
-        //                // Create a new movie object for each row in the result set
-        //                Movie movie = new Movie(id, title, null, null, null);
-
-        //                query = "SELECT p.id, p.name, mp.role FROM people p JOIN movie_people mp ON p.id = mp.person_id WHERE mp.movie_id = @movieId;";
-        //                cmd = new MySqlCommand(query, dbCon.Connection);
-        //                cmd.Parameters.AddWithValue("@movieId", id);
-
-        //                movie.Directors = new List<string>();
-        //                movie.Writers = new List<string>();
-        //                movie.Stars = new List<string>();
-
-
-        //                // Add the movie object to the list
-
-        //                using (var rolesReader = cmd.ExecuteReader())
-        //                {
-        //                    while (rolesReader.Read())
-        //                    {
-        //                        string role = rolesReader.GetString("role");
-        //                        string name = rolesReader.GetString("name");
-
-        //                        if (role == "director")
-        //                        {
-        //                            movie.Directors.Add(name);
-        //                        }
-        //                        else if (role == "writer")
-        //                        {
-        //                            movie.Writers.Add(name);
-        //                        }
-        //                        else if (role == "star")
-        //                        {
-        //                            movie.Stars.Add(name);
-        //                        }
-        //                    }
-        //                }
-
-        //                movies.Add(movie);
-        //            }
-        //        }
-
-        //    }
-        //    return movies;
-        //}
-
-        public List<Movie> ReadAllMovie(int movieId)
+        public List<Movie> ReadAllMovie(int idToFind)
         {
-            List<Movie> movies = new List<Movie>();
+            List<Movie> movieList = new List<Movie>();
 
-            string connectionString = "Server=localhost;Database=film;Uid=root;Pwd=";
-            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            DBConnection dbCon = DBConnection.Instance();
+            string query;
+            var cmd = new MySqlCommand();
+            if (dbCon.IsConnected())
             {
-                connection.Open();
-
-                string query = "SELECT m.id, m.title, p.id AS personId, p.name, mp.role FROM movie m " +
-                               "LEFT JOIN movie_people mp ON m.id = mp.movie_id " +
-                               "LEFT JOIN people p ON p.id = mp.person_id " +
-                               "WHERE m.storage_id = @id;";
-
-                MySqlCommand cmd = new MySqlCommand(query, connection);
-                cmd.Parameters.AddWithValue("@id", movieId);
+                query = "SELECT id, title, imdb_url FROM movie WHERE storage_id = @id;";
+                cmd = new MySqlCommand(query, dbCon.Connection);
+                cmd.Parameters.AddWithValue ("id", idToFind);
 
                 using (var reader = cmd.ExecuteReader())
                 {
@@ -237,43 +130,82 @@ namespace FilmFinder
                     {
                         int id = reader.GetInt32("id");
                         string title = reader.GetString("title");
-
-                        // Check if the movie is already in the list
-                        Movie movie = movies.FirstOrDefault(m => m.Id == id);
-
-                        // If not, create a new movie object and add it to the list
-                        if (movie == null)
-                        {
-                            movie = new Movie(id, title, new List<string>(), new List<string>(), new List<string>());
-                            movies.Add(movie);
-                        }
-                        if (!reader.IsDBNull("role") &&  !reader.IsDBNull("name"))
-                        {
-                            string role = reader.GetString("role");
-                            string name = reader.GetString("name");
-                        if (role == "director")
-                        {
-                            movie.Directors.Add(name);
-                        }
-                        else if (role == "writer")
-                        {
-                            movie.Writers.Add(name);
-                        }
-                        else if (role == "star")
-                        {
-                            movie.Stars.Add(name);
-                        }
-                        }
+                        string imdb_url = reader.GetString("imdb_url");
+                        Movie movie = new Movie(id, title, 0, imdb_url);
+                        movieList.Add(movie);
                     }
                 }
             }
+            return movieList;
+        }
+        public List<Movie> ReadAllMovie()
+        {
+            List<Movie> movieList = new List<Movie>();
 
-            return movies;
+            DBConnection dbCon = DBConnection.Instance();
+            string query;
+            var cmd = new MySqlCommand();
+            if (dbCon.IsConnected())
+            {
+                query = "SELECT id, title, storage_id, imdb_url FROM movie;";
+                cmd = new MySqlCommand(query, dbCon.Connection);
+
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        int id = reader.GetInt32("id");
+                        string title = reader.GetString("title");
+                        int storage_id = reader.GetInt32("storage_id");
+                        string imdb_url = reader.GetString("imdb_url");
+                        Movie movie = new Movie(id, title, storage_id, imdb_url);
+                        movieList.Add(movie);
+                    }
+                }
+            }
+            return movieList;
         }
 
+        public List<Movie> ReadAllMovieName(string titleToFind)
+        {
+            List<Movie> movieList = new List<Movie>();
 
+            DBConnection dbCon = DBConnection.Instance();
+            string query;
+            var cmd = new MySqlCommand();
+            if (dbCon.IsConnected())
+            {
+                query = "SELECT id, title, imdb_url FROM movie WHERE title = @title;";
+                cmd = new MySqlCommand(query, dbCon.Connection);
+                cmd.Parameters.AddWithValue("@title", titleToFind.Trim());
 
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        int id = reader.GetInt32("id");
+                        string title = reader.GetString("title");
+                        string imdb_url = reader.GetString("imdb_url");
+                        Movie movie = new Movie(id, title, 0, imdb_url);
+                        movieList.Add(movie);
+                    }
+                }
+            }
+            return movieList;
+        }
 
+        public List<Movie> FilterMovies(List<Movie> movies, string title)
+        {
+            List<Movie> filteredMovies = new List<Movie>();
+            foreach (Movie movie in movies)
+            {
+                if (movie.Title.Contains(title, StringComparison.OrdinalIgnoreCase))
+                {
+                    filteredMovies.Add(movie);
+                }
+            }
+            return filteredMovies;
+        }
 
         // Methods to manage storage
         public void AddStorage(string name, string description)
@@ -290,6 +222,7 @@ namespace FilmFinder
                 int id = (int)cmd.LastInsertedId;
             }
         }
+
         public void DeleteStorage(int Id)
         {
             DBConnection dbCon = DBConnection.Instance();
@@ -310,20 +243,22 @@ namespace FilmFinder
                 }
             }
         }
-        public void UpdateStorage(string name, string preName)
+        public void UpdateStorage(string name, string description, int id)
         {
             DBConnection dbCon = DBConnection.Instance();
             if (dbCon.IsConnected())
             {
-                string query = $"UPDATE storage SET name = @name WHERE name = @preName;";
+                string query = $"UPDATE storage SET name = @name, description = @description WHERE id = @id;";
                 var cmd = new MySqlCommand(query, dbCon.Connection);
                 cmd.Parameters.AddWithValue("@name", name);
-                cmd.Parameters.AddWithValue("@preName", preName);
+                cmd.Parameters.AddWithValue("@description", description);
+                cmd.Parameters.AddWithValue("@id", id);
                 cmd.Prepare();
                 int affected = cmd.ExecuteNonQuery();
                 Console.WriteLine($"Updated {affected} rows!");
             }
         }
+
         public Storage ReadStorage(int idToFind)
         {
             Storage storage = new Storage(0, null, null);
@@ -380,23 +315,18 @@ namespace FilmFinder
             return storageList;
         }
 
-
-        // Methods to manage people
-        public void AddPeople()
+        public List<Storage> FilterStorages(List<Storage> storages, string name)
         {
+            List<Storage> filteredStorages = new List<Storage>();
 
-        }
-        public void DeletePeople()
-        {
-
-        }
-        public void UpdatePeople()
-        {
-
-        }
-        public void ReadPeople()
-        {
-
+            foreach (Storage storage in storages)
+            {
+                if (storage.Name.Contains(name, StringComparison.OrdinalIgnoreCase))
+                {
+                    filteredStorages.Add(storage);
+                }
+            }
+            return filteredStorages;
         }
 
         // Other methods for managing and coordinating operations

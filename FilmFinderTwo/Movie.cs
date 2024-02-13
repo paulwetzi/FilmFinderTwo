@@ -19,18 +19,16 @@ namespace FilmFinder
         // Properties
         public int Id { get; set; }
         public string Title { get; set; }
-        public List<string> Directors { get; set; }
-        public List<string> Writers { get; set; }
-        public List<string> Stars { get; set; }
+        public int Storage_id { get; set; }
+        public string IMDbUrl { get; set; }
 
         // Constructor
-        public Movie(int id, string title, List<string> directors, List<string> writers, List<string> stars)
+        public Movie(int id, string title, int storage_id, string imdbUrl)
         {
             Id = id;
             Title = title;
-            Directors = directors;
-            Writers = writers;
-            Stars = stars;
+            Storage_id = storage_id;
+            IMDbUrl = imdbUrl;
         }
 
         // Methods
@@ -38,21 +36,10 @@ namespace FilmFinder
         {
             Console.WriteLine($"Movie ID: {Id}");
             Console.WriteLine($"Title: {Title}");
-            Console.WriteLine("Directors:");
-            foreach (var director in Directors)
-            {
-                Console.WriteLine($"- {director}");
-            }
-            Console.WriteLine("Writers:");
-            foreach (var writer in Writers)
-            {
-                Console.WriteLine($"- {writer}");
-            }
-            Console.WriteLine("Stars:");
-            foreach (var star in Stars)
-            {
-                Console.WriteLine($"- {star}");
-            }
+            Console.WriteLine($"Storage_id: {Storage_id}");
+            Console.WriteLine($"IMDb URL: {IMDbUrl}");
         }
     }
 }
+
+

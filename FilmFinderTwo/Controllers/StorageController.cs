@@ -1,6 +1,7 @@
 using FilmFinder;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
+using static FilmFinderTwo.Controllers.MovieController;
 using static FilmFinderTwo.Controllers.StorageController;
 
 /*
@@ -45,23 +46,13 @@ namespace FilmFinderTwo.Controllers
         [HttpPut("PutStorage")]
         public ActionResult Put(UpdateStorageDTO toUpdate)
         {
-            manager.UpdateStorage(toUpdate.name, toUpdate.preName);
+            manager.UpdateStorage(toUpdate.name, toUpdate.description, toUpdate.id);
             _logger.LogInformation($"Updated storage with title: {toUpdate}");
             return Ok();
         }
 
         // \\\\\\\\\\\\\\\\\  Get Methods  \\\\\\\\\\\\\\\\\
 
-        // With Body
-        //[HttpGet("GetStorageBody")]
-        //public ActionResult<Movie> Get(ReadStorageDTO toRead)
-        //{
-        //    Storage storage = manager.ReadStorage(toRead.idToFind);
-        //    _logger.LogInformation($"Read storage with ID: {toRead}");
-        //    return Ok(storage);
-        //}
-
-        //with Query
        [HttpGet("GetStorageQuery")]
         public ActionResult<Movie> Get([FromQuery] int idToFind)
         {
@@ -78,9 +69,19 @@ namespace FilmFinderTwo.Controllers
             return Ok(storage);
         }
 
+        [HttpGet("GetAllStorageName")]
+        public ActionResult<Movie> get([FromQuery] ReadAllStorageNameDTO toRead)
+        {
+            List<Storage> storages = manager.ReadAllStorage();
+            List<Storage> filteredMovies = manager.FilterStorages(storages, toRead.name);
+            _logger.LogInformation($"read all Storages");
+            return Ok(filteredMovies);
+        }
+
         public record AddStorageDTO(string name, string description);
         public record DeleteStorageDTO(int id);
-        public record UpdateStorageDTO(string name, string preName);
+        public record UpdateStorageDTO(string name, string description, int id);
         public record ReadStorageDTO(int idToFind);
+        public record ReadAllStorageNameDTO(string name);
     }
 }

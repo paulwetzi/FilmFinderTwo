@@ -28,7 +28,7 @@ namespace FilmFinderTwo.Controllers
         [HttpPost("PostMovie")]
         public ActionResult Post(AddMovieDTO movie)
         {
-            manager.AddMovie(movie.Title, movie.storageId);
+            manager.AddMovie(movie.Title, movie.imdb_url, movie.storageId);
             _logger.LogInformation(movie.ToString());
             return Ok();
         }
@@ -44,7 +44,7 @@ namespace FilmFinderTwo.Controllers
         [HttpPut("PutMovie")]
         public ActionResult Put(UpdateMovieDTO toUpdate)
         {
-            manager.UpdateMovie(toUpdate.id, toUpdate.preId);
+            manager.UpdateMovie(toUpdate.id, toUpdate.newTitle, toUpdate.newImdbUrl);
             _logger.LogInformation($"Updated movie with title: {toUpdate}");
             return Ok();
         }
@@ -58,17 +58,45 @@ namespace FilmFinderTwo.Controllers
         }
 
         [HttpGet("GetAllMovie")]
-        public ActionResult<Movie> Get([FromQuery] ReadAllMovieDTO toRead)
+        public ActionResult<Movie> get([FromQuery] ReadAllMovieDTO toRead)
         {
             List<Movie> movies = manager.ReadAllMovie(toRead.moviesId);
-            _logger.LogInformation($"Read movie with id: {toRead.moviesId}");
+            _logger.LogInformation($"read movie with id: ");
             return Ok(movies);
         }
 
-        public record AddMovieDTO(string Title, int storageId);
+        [HttpGet("GetAllMovies")]
+        public ActionResult<Movie> get()
+        {
+            List<Movie> movies = manager.ReadAllMovie();
+            _logger.LogInformation($"read all movies there are");
+            return Ok(movies);
+        }
+
+        [HttpGet("GetAllMovieName")]
+        public ActionResult<Movie> get([FromQuery] ReadAllMovieNameDTO toRead)
+        {
+            List<Movie> movies = manager.ReadAllMovie();
+            List<Movie> filteredMovies = manager.FilterMovies(movies, toRead.moviesTitle);
+            _logger.LogInformation($"read movie with id: ");
+            return Ok(filteredMovies);
+        }
+
+        [HttpGet("GetAllMovieNameStorage")]
+        public ActionResult<Movie> get([FromQuery] ReadAllMovieNameStorageDTO toRead)
+        {
+            List<Movie> movies = manager.ReadAllMovie(toRead.moviesId);
+            List<Movie> filteredMovies = manager.FilterMovies(movies, toRead.moviesTitle);
+            _logger.LogInformation($"read movie with id: ");
+            return Ok(filteredMovies);
+        }
+
+        public record AddMovieDTO(string Title, string imdb_url, int storageId);
         public record DeleteMovieDTO(int id);
-        public record UpdateMovieDTO(int id, int preId);
+        public record UpdateMovieDTO(int id, string newTitle, string newImdbUrl);
         public record ReadMovieDTO(int id);
         public record ReadAllMovieDTO(int moviesId);
+        public record ReadAllMovieNameDTO(string moviesTitle);
+        public record ReadAllMovieNameStorageDTO(int moviesId, string moviesTitle);
     }
 }
