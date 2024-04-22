@@ -30,7 +30,7 @@ namespace FilmFinderTwo.Controllers
         [HttpPost("PostStorage")]
         public ActionResult Post(AddStorageDTO storage)
         {
-            manager.AddStorage(storage.name, storage.description);
+            manager.AddStorage(storage.userId, storage.name, storage.description);
             _logger.LogInformation(storage.ToString());
             return Ok();
         }
@@ -78,7 +78,7 @@ namespace FilmFinderTwo.Controllers
             return Ok(filteredMovies);
         }
 
-        public record AddStorageDTO(string name, string description);
+        public record AddStorageDTO(int userId, string name, string description);
         public record DeleteStorageDTO(int id);
         public record UpdateStorageDTO(string name, string description, int id);
         public record ReadStorageDTO(int idToFind);

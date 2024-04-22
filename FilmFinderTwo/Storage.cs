@@ -12,29 +12,35 @@ using System.Threading.Tasks;
  * \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
  */
 
-namespace FilmFinder
+public class Storage
 {
-    public class Storage
+    // Properties
+    public int Id { get; set; }
+    public int UserId { get; set; }
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
+
+    // Constructor
+    public Storage(int id, int userId, string name, string description, DateTime createdAt, DateTime updatedAt)
     {
-        // Properties
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
+        Id = id;
+        UserId = userId;
+        Name = name;
+        Description = description;
+        CreatedAt = createdAt;
+        UpdatedAt = updatedAt;
+    }
 
-        // Constructor
-        public Storage(int id, string name, string description)
-        {
-            Id = id;
-            Name = name;
-            Description = description;
-        }
-
-        // Methods
-        public void DisplayStorageInfo()
-        {
-            Console.WriteLine($"Storage ID: {Id}");
-            Console.WriteLine($"Name: {Name}");
-            Console.WriteLine($"Description: {Description}");
-        }
+    // Methods
+    public void DisplayStorageInfo()
+    {
+        Console.WriteLine($"Storage ID: {Id}");
+        Console.WriteLine($"User ID: {UserId}");
+        Console.WriteLine($"Name: {Name}");
+        Console.WriteLine($"Description: {Description}");
+        Console.WriteLine($"Created at: {CreatedAt}");
+        Console.WriteLine($"Updated at: {UpdatedAt}");
     }
 }

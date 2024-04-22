@@ -32,7 +32,7 @@ namespace FilmFinder
             DBConnection dbCon = DBConnection.Instance();
             if (dbCon.IsConnected())
             {
-                string query = "INSERT INTO movie(`title`, `imdb_url`, `storage_id`) VALUES (@title, @imdb_url, @storageId)";
+                string query = "INSERT INTO movies(`title`, `imdb_url`, `storage_id`) VALUES (@title, @imdb_url, @storageId)";
                 var cmd = new MySqlCommand(query, dbCon.Connection);
                 cmd.Parameters.AddWithValue("@title", title);
                 cmd.Parameters.AddWithValue("@storageId", storageId);
@@ -50,7 +50,7 @@ namespace FilmFinder
             DBConnection dbCon = DBConnection.Instance();
             if (dbCon.IsConnected())
             {
-                string query = "DELETE FROM movie WHERE id = @Id;";
+                string query = "DELETE FROM movies WHERE id = @Id;";
                 var cmd = new MySqlCommand(query, dbCon.Connection);
                 cmd.Parameters.AddWithValue("@Id", Id);
                 cmd.Prepare();
@@ -70,7 +70,7 @@ namespace FilmFinder
             DBConnection dbCon = DBConnection.Instance();
             if (dbCon.IsConnected())
             {
-                string query = "UPDATE movie SET title = @title, imdb_url = @newImdbUrl WHERE id = @id;";
+                string query = "UPDATE movies SET title = @title, imdb_url = @newImdbUrl WHERE id = @id;";
                 var cmd = new MySqlCommand(query, dbCon.Connection);
                 cmd.Parameters.AddWithValue("@id", id);
                 cmd.Parameters.AddWithValue("@title", newTitle);
@@ -82,14 +82,14 @@ namespace FilmFinder
         }
         public Movie ReadMovie(int idToFind)
         {
-            Movie movie = new Movie(0, null, 0, null);
+            Movie movie = null;
 
             DBConnection dbCon = DBConnection.Instance();
             string query;
             var cmd = new MySqlCommand();
             if (dbCon.IsConnected())
             {
-                query = "SELECT id, title, storage_id,imdb_url FROM movie WHERE id = @id;";
+                query = "SELECT id, title, storage_id,imdb_url FROM movies WHERE id = @id;";
                 cmd = new MySqlCommand(query, dbCon.Connection);
                 cmd.Parameters.AddWithValue("@id", idToFind);
 
@@ -103,7 +103,7 @@ namespace FilmFinder
                         string imdb_url = reader.GetString("imdb_url");
                         movie.Id = id;
                         movie.Title = title;
-                        movie.Storage_id = storage_id;
+                        movie.StorageId = storage_id;
                         movie.IMDbUrl = imdb_url;
                     }
                 }
@@ -120,7 +120,7 @@ namespace FilmFinder
             var cmd = new MySqlCommand();
             if (dbCon.IsConnected())
             {
-                query = "SELECT id, title, imdb_url FROM movie WHERE storage_id = @id;";
+                query = "SELECT id, title, imdb_url FROM movies WHERE storage_id = @id;";
                 cmd = new MySqlCommand(query, dbCon.Connection);
                 cmd.Parameters.AddWithValue ("id", idToFind);
 
@@ -131,7 +131,7 @@ namespace FilmFinder
                         int id = reader.GetInt32("id");
                         string title = reader.GetString("title");
                         string imdb_url = reader.GetString("imdb_url");
-                        Movie movie = new Movie(id, title, 0, imdb_url);
+                        Movie movie = new Movie(id, 0, title, imdb_url);
                         movieList.Add(movie);
                     }
                 }
@@ -147,7 +147,7 @@ namespace FilmFinder
             var cmd = new MySqlCommand();
             if (dbCon.IsConnected())
             {
-                query = "SELECT id, title, storage_id, imdb_url FROM movie;";
+                query = "SELECT id, title, storage_id, imdb_url FROM movies;";
                 cmd = new MySqlCommand(query, dbCon.Connection);
 
                 using (var reader = cmd.ExecuteReader())
@@ -158,7 +158,7 @@ namespace FilmFinder
                         string title = reader.GetString("title");
                         int storage_id = reader.GetInt32("storage_id");
                         string imdb_url = reader.GetString("imdb_url");
-                        Movie movie = new Movie(id, title, storage_id, imdb_url);
+                        Movie movie = new Movie(id, storage_id, title, imdb_url);
                         movieList.Add(movie);
                     }
                 }
@@ -175,7 +175,7 @@ namespace FilmFinder
             var cmd = new MySqlCommand();
             if (dbCon.IsConnected())
             {
-                query = "SELECT id, title, imdb_url FROM movie WHERE title = @title;";
+                query = "SELECT id, title, imdb_url FROM movies WHERE title = @title;";
                 cmd = new MySqlCommand(query, dbCon.Connection);
                 cmd.Parameters.AddWithValue("@title", titleToFind.Trim());
 
@@ -186,7 +186,7 @@ namespace FilmFinder
                         int id = reader.GetInt32("id");
                         string title = reader.GetString("title");
                         string imdb_url = reader.GetString("imdb_url");
-                        Movie movie = new Movie(id, title, 0, imdb_url);
+                        Movie movie = new Movie(id, 0, title, imdb_url);
                         movieList.Add(movie);
                     }
                 }
@@ -208,13 +208,14 @@ namespace FilmFinder
         }
 
         // Methods to manage storage
-        public void AddStorage(string name, string description)
+        public void AddStorage(int userId, string name, string description)
         {
             DBConnection dbCon = DBConnection.Instance();
             if (dbCon.IsConnected())
             {
-                string query = "INSERT INTO storage(`name`, `description`)VALUES(@name, @description)";
+                string query = "INSERT INTO storages(user_id, name, description) VALUES(@userId, @name, @description)";
                 var cmd = new MySqlCommand(query, dbCon.Connection);
+                cmd.Parameters.AddWithValue("@userId", userId);
                 cmd.Parameters.AddWithValue("@name", name);
                 cmd.Parameters.AddWithValue("@description", description);
                 cmd.Prepare();
@@ -228,7 +229,7 @@ namespace FilmFinder
             DBConnection dbCon = DBConnection.Instance();
             if (dbCon.IsConnected())
             {
-                string query = "DELETE FROM storage WHERE id = @Id;";
+                string query = "DELETE FROM storages WHERE id = @Id;";
                 var cmd = new MySqlCommand(query, dbCon.Connection);
                 cmd.Parameters.AddWithValue("@Id", Id);
                 cmd.Prepare();
@@ -248,7 +249,7 @@ namespace FilmFinder
             DBConnection dbCon = DBConnection.Instance();
             if (dbCon.IsConnected())
             {
-                string query = $"UPDATE storage SET name = @name, description = @description WHERE id = @id;";
+                string query = $"UPDATE storages SET name = @name, description = @description WHERE id = @id;";
                 var cmd = new MySqlCommand(query, dbCon.Connection);
                 cmd.Parameters.AddWithValue("@name", name);
                 cmd.Parameters.AddWithValue("@description", description);
@@ -261,14 +262,14 @@ namespace FilmFinder
 
         public Storage ReadStorage(int idToFind)
         {
-            Storage storage = new Storage(0, null, null);
+            Storage storage = null;
 
             DBConnection dbCon = DBConnection.Instance();
             string query;
             var cmd = new MySqlCommand();
             if (dbCon.IsConnected())
             {
-                query = "SELECT id, name, description FROM storage WHERE id = @id;";
+                query = "SELECT id, name, description FROM storages WHERE id = @id;";
                 cmd = new MySqlCommand(query, dbCon.Connection);
                 cmd.Parameters.AddWithValue("@id", idToFind);
 
@@ -297,7 +298,7 @@ namespace FilmFinder
             var cmd = new MySqlCommand();
             if (dbCon.IsConnected())
             {
-                query = "SELECT id, name, description FROM storage;";
+                query = "SELECT id, name, description FROM storages;";
                 cmd = new MySqlCommand(query, dbCon.Connection);
 
                 using (var reader = cmd.ExecuteReader())
@@ -307,7 +308,7 @@ namespace FilmFinder
                         int id = reader.GetInt32("id");
                         string name = reader.GetString("name");
                         string description = reader.GetString("description");
-                        Storage storage = new Storage(id, name, description);
+                        Storage storage = null;
                         storageList.Add(storage);
                     }
                 }
@@ -329,16 +330,58 @@ namespace FilmFinder
             return filteredStorages;
         }
 
-        // Other methods for managing and coordinating operations
+        // Methods to manage user
 
-        public void DisplayMovies()
+        public void Register(string email, string name, string password)
         {
-
+            DBConnection dbCon = DBConnection.Instance();
+            if (dbCon.IsConnected())
+            {
+                string query = "INSERT INTO users (email, password, name) VALUES (@email, @password, @name)";
+                var cmd = new MySqlCommand(query, dbCon.Connection);
+                cmd.Parameters.AddWithValue("@email", email);
+                cmd.Parameters.AddWithValue("@password", password);
+                cmd.Parameters.AddWithValue("@name", name);
+                cmd.Prepare();
+                cmd.ExecuteNonQuery();
+            }
         }
-
-        public void DisplayStorageLocations()
+        public User Login(string emailToFind, string password)
         {
 
+            User user = null;
+
+            DBConnection dbCon = DBConnection.Instance();
+            string query;
+            var cmd = new MySqlCommand();
+            if (dbCon.IsConnected())
+            {
+                query = "SELECT id, email, password, created_at, updated_at, name FROM users WHERE email = @email AND password = @password;";
+                cmd = new MySqlCommand(query, dbCon.Connection);
+                cmd.Parameters.AddWithValue("@email", emailToFind);
+                cmd.Parameters.AddWithValue("@password", password);
+
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        int id = reader.GetInt32("id");
+                        string email = reader.GetString("email");
+                        string name = reader.GetString("name"); 
+                        //string password = reader.GetString("password");
+                        DateTime created_at = reader.GetDateTime("created_at");
+                        DateTime updated_at = reader.GetDateTime("updated_at");
+
+                        if (password == reader.GetString("password"))
+                        {
+                            user = new User(id, email, password, name, created_at, updated_at);
+                        }
+      
+                    }
+                }
+            }
+            return user;
         }
     }
 }
+

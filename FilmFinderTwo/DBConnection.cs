@@ -49,7 +49,7 @@ namespace FilmFinder
             // Settings here for DB connection
 
             string Server = "localhost";
-            string Database = "film";
+            string Database = "filmfinder";
             string Username = "root";
             string Password = "";
 

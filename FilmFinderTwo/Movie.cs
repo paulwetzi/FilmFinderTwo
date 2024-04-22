@@ -18,26 +18,32 @@ namespace FilmFinder
     {
         // Properties
         public int Id { get; set; }
+        public int StorageId { get; set; }
         public string Title { get; set; }
-        public int Storage_id { get; set; }
         public string IMDbUrl { get; set; }
+        public DateTime? CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
 
         // Constructor
-        public Movie(int id, string title, int storage_id, string imdbUrl)
+        public Movie(int id, int storageId,string title, string imdbUrl, DateTime? createdAt = null, DateTime? updatedAt = null)
         {
             Id = id;
+            StorageId = storageId;
             Title = title;
-            Storage_id = storage_id;
             IMDbUrl = imdbUrl;
+            CreatedAt = createdAt;
+            UpdatedAt = updatedAt;
         }
 
         // Methods
         public void DisplayMovieInfo()
         {
             Console.WriteLine($"Movie ID: {Id}");
+            Console.WriteLine($"Storage Id: {StorageId}");
             Console.WriteLine($"Title: {Title}");
-            Console.WriteLine($"Storage_id: {Storage_id}");
             Console.WriteLine($"IMDb URL: {IMDbUrl}");
+            Console.WriteLine($"Created at: {CreatedAt}");
+            Console.WriteLine($"Updated at: {UpdatedAt}");
         }
     }
 }
